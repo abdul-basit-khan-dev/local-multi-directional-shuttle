@@ -31,7 +31,7 @@ class RabbitMQHandler {
 			return;
 		}
 
-		// await this.channel.assertQueue(queueConsume, { durable: true });
+		await this.channel.assertQueue(queueConsume, { durable: true });
 		await this.channel.consume(
 			queueConsume,
 			async (message) => {
