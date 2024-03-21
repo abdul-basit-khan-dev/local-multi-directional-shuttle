@@ -44,12 +44,6 @@ io.on("connection", (socket) => {
 	});
 });
 
-app.get("/", (req, res) => {
-	res.status(200).json({
-		message: "Welcome to NodeJS + Express API's.",
-	});
-});
-
 server.listen(PORT, function () {
 	console.log(`Example app listening on port ${PORT}!`);
 });
