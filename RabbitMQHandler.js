@@ -3,6 +3,7 @@ const amqp = require("amqplib");
 const queueConsume = "Grid-Level-Instructions";
 const queueSend = "CompletedInstructions";
 const rabbitmqUrl = "amqp://20.190.124.233:5672/";
+const queueLiveLogs = "LiveLogs";
 
 class RabbitMQHandler {
 	constructor() {
@@ -23,9 +24,7 @@ class RabbitMQHandler {
 	}
 
 	async listenForMessages() {
-		console.log("listenForMessages");
-		this.messages = [];
-
+		this.messages = new Array();
 		if (!this.channel) {
 			console.warn("Channel is not initialized.");
 			return;
@@ -57,10 +56,30 @@ class RabbitMQHandler {
 				queueSend,
 				Buffer.from(JSON.stringify(data))
 			);
-			console.log("Message sent successfully.");
 		} catch (err) {
 			console.warn("Error sending message:", err);
 		}
+	}
+
+	async liveLogs() {
+		this.messages = new Array();
+		if (!this.channel) {
+			console.warn("Channel is not initialized.");
+			return;
+		}
+
+		await this.channel.assertQueue(queueLiveLogs, { durable: true });
+		await this.channel.consume(
+			queueLiveLogs,
+			async (message) => {
+				const resData = await JSON.parse(message.content.toString());
+				console.log("resData : ", resData);
+				await this.messages.push(resData);
+			},
+			{ noAck: true }
+		);
+
+		return this.messages;
 	}
 
 	async closeConnection() {
