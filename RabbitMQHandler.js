@@ -36,12 +36,13 @@ class RabbitMQHandler {
 			async (message) => {
 				const resData = await JSON.parse(message.content.toString());
 				console.log("resData : ", resData);
-				await this.messages.push(resData);
+				// this.messages = resData;
+				return resData;
 			},
 			{ noAck: true }
 		);
 
-		return this.messages;
+		// return this.messages;
 	}
 
 	async sendMessage(data) {
@@ -61,26 +62,26 @@ class RabbitMQHandler {
 		}
 	}
 
-	async liveLogs() {
-		this.messages = new Array();
-		if (!this.channel) {
-			console.warn("Channel is not initialized.");
-			return;
-		}
+	// async liveLogs() {
+	// 	this.messages = new Array();
+	// 	if (!this.channel) {
+	// 		console.warn("Channel is not initialized.");
+	// 		return;
+	// 	}
 
-		await this.channel.assertQueue(queueLiveLogs, { durable: true });
-		await this.channel.consume(
-			queueLiveLogs,
-			async (message) => {
-				const resData = await JSON.parse(message.content.toString());
-				console.log("resData : ", resData);
-				await this.messages.push(resData);
-			},
-			{ noAck: true }
-		);
+	// 	await this.channel.assertQueue(queueLiveLogs, { durable: true });
+	// 	await this.channel.consume(
+	// 		queueLiveLogs,
+	// 		async (message) => {
+	// 			const resData = await JSON.parse(message.content.toString());
+	// 			console.log("resData : ", resData);
+	// 			await this.messages.push(resData);
+	// 		},
+	// 		{ noAck: true }
+	// 	);
 
-		return this.messages;
-	}
+	// 	return this.messages;
+	// }
 
 	async closeConnection() {
 		try {

@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
-const RabbitMQHandler = require("./RabbitMQHandler");
+const amqp = require("amqplib");
 require("dotenv").config();
 
 const PORT = 8000;
@@ -10,44 +10,72 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
 	cors: {
-		origin: "https://multi-directional-shuttle.vercel.app/",
+		origin: [
+			"http://localhost:3000/",
+			"https://multi-directional-shuttle.vercel.app/",
+		],
 		methods: ["GET", "POST"],
-		credentials: true,
 	},
 });
 
-const rabbitHandler = new RabbitMQHandler();
+// const rabbitHandler = new RabbitMQHandler();
+const queueConsume = "Grid-Level-Instructions";
+const queueSend = "CompletedInstructions";
+const rabbitmqUrl = "amqp://20.190.124.233:5672/";
+const queueLiveLogs = "LiveLogs";
+let channel;
+
+amqp
+	.connect(rabbitmqUrl)
+	.then((connection) => connection.createChannel())
+	.then((chnl) => {
+		channel = chnl;
+		console.log("Channle created...");
+	})
+	.catch((error) => {
+		console.error("Error connecting to RabbitMQ", error);
+	});
 
 io.on("connection", (socket) => {
 	socket.on("message", async () => {
-		try {
-			const messages = await rabbitHandler.listenForMessages();
-			console.log("Received RabbitMQ Messages List:", messages);
-			await socket.emit("response", messages);
-		} catch (err) {
-			console.error("Error Receiving RabbitMQ Messages List:", err);
+		if (channel) {
+			try {
+				await channel.assertQueue(queueConsume, { durable: true });
+				await channel.consume(
+					queueConsume,
+					async (message) => {
+						const resData = await JSON.parse(message.content.toString());
+						console.log("resData : ", resData);
+						await socket.emit("response", resData);
+					},
+					{ noAck: true }
+				);
+			} catch (err) {
+				console.error("Error Receiving RabbitMQ Messages List:", err);
+			}
 		}
 	});
 
 	socket.on("sendData", async (data) => {
-		console.log("Received data from client:", data);
-		try {
-			await rabbitHandler.sendMessage(data);
-			console.log("Data sent to RabbitMQ successfully.");
-		} catch (err) {
-			console.error("Error sending data to RabbitMQ:", err);
+		if (channel) {
+			try {
+				await channel.assertQueue(queueSend, { durable: true });
+				await channel.sendToQueue(queueSend, Buffer.from(JSON.stringify(data)));
+			} catch (err) {
+				console.error("Error Receiving RabbitMQ Messages List:", err);
+			}
 		}
 	});
 
-	socket.on("liveLogs", async () => {
-		console.log("liveLogs");
-		try {
-			const logs = await rabbitHandler.liveLogs();
-			await socket.emit("responseLiveLogs", logs);
-		} catch (err) {
-			console.error("Error sending data to RabbitMQ:", err);
-		}
-	});
+	// socket.on("liveLogs", async () => {
+	// 	console.log("liveLogs");
+	// 	try {
+	// 		const logs = await rabbitHandler.liveLogs();
+	// 		await socket.emit("responseLiveLogs", logs);
+	// 	} catch (err) {
+	// 		console.error("Error sending data to RabbitMQ:", err);
+	// 	}
+	// });
 
 	socket.on("disconnect", () => {
 		console.log("Client disconnected");
