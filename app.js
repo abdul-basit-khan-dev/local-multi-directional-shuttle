@@ -4,6 +4,7 @@ const http = require("http");
 const { Server } = require("socket.io");
 const amqp = require("amqplib");
 require("dotenv").config();
+const { exec } = require("child_process");
 
 const PORT = 8000;
 const app = express();
@@ -18,7 +19,6 @@ const io = new Server(server, {
 	},
 });
 
-// const rabbitHandler = new RabbitMQHandler();
 const queueConsume = "Grid-Level-Instructions";
 const queueSend = "CompletedInstructions";
 const rabbitmqUrl = "amqp://20.190.124.233:5672/";
@@ -30,32 +30,35 @@ amqp
 	.then((connection) => connection.createChannel())
 	.then((chnl) => {
 		channel = chnl;
-		console.log("Channle created...");
+		console.log("Channel created...");
+		return channel.assertQueue(queueConsume, { durable: true });
+	})
+	.then(() => {
+		return channel.consume(
+			queueConsume,
+			async (message) => {
+				const resData = JSON.parse(message.content.toString());
+				console.log("resData : ", resData);
+				io.emit("response", resData);
+			},
+			{ noAck: true }
+		);
+	})
+	.then(() => {
+		return channel.consume(
+			queueLiveLogs,
+			async (message) => {
+				const resData = JSON.parse(message.content.toString());
+				io.emit("responseLiveLogs", resData);
+			},
+			{ noAck: true }
+		);
 	})
 	.catch((error) => {
 		console.error("Error connecting to RabbitMQ", error);
 	});
 
 io.on("connection", (socket) => {
-	socket.on("message", async () => {
-		if (channel) {
-			try {
-				await channel.assertQueue(queueConsume, { durable: true });
-				await channel.consume(
-					queueConsume,
-					async (message) => {
-						const resData = await JSON.parse(message.content.toString());
-						console.log("resData : ", resData);
-						await socket.emit("response", resData);
-					},
-					{ noAck: true }
-				);
-			} catch (err) {
-				console.error("Error Receiving RabbitMQ Messages List:", err);
-			}
-		}
-	});
-
 	socket.on("sendData", async (data) => {
 		if (channel) {
 			try {
@@ -66,16 +69,6 @@ io.on("connection", (socket) => {
 			}
 		}
 	});
-
-	// socket.on("liveLogs", async () => {
-	// 	console.log("liveLogs");
-	// 	try {
-	// 		const logs = await rabbitHandler.liveLogs();
-	// 		await socket.emit("responseLiveLogs", logs);
-	// 	} catch (err) {
-	// 		console.error("Error sending data to RabbitMQ:", err);
-	// 	}
-	// });
 
 	socket.on("disconnect", () => {
 		console.log("Client disconnected");
