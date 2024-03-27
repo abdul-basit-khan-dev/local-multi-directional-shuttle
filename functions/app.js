@@ -88,3 +88,4 @@ server.listen(PORT, function () {
 });
 
 app.use("/.netlify/functions/app", router);
+module.exports.handler = serverless(app);
