@@ -9,16 +9,11 @@ const { exec } = require("child_process");
 const PORT = process.env.PORT || 8000;
 const app = express();
 
+// Enable CORS for all requests
+app.use(cors());
+
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: [
-            "http://localhost:3000/",
-            "https://multi-directional-shuttle.vercel.app/",
-        ],
-        methods: ["GET", "POST"],
-    },
-});
+const io = new Server(server);
 
 const queueConsume = "Grid-Level-Instructions";
 const queueSend = "CompletedInstructions";
