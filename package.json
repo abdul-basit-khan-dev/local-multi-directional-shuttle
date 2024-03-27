@@ -4,10 +4,10 @@
 	"description": "",
 	"main": "app.js",
 	"scripts": {
-		"start": "./node_modules/.bin/netlify-lambda serve src",
+		"start": "nodemon ./functions/app.js",
 		"server": "nodemon app.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "echo \"No build step needed for this project\""
+		"build": "netlify deploy --prod"
 	},
 	"author": "",
 	"license": "ISC",
