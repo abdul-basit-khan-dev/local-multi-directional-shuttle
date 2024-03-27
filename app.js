@@ -1,4 +1,5 @@
 const express = require("express");
+const serverless = require("serverless");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
@@ -8,6 +9,7 @@ const { exec } = require("child_process");
 
 const PORT = process.env.PORT || 8000;
 const app = express();
+
 const server = http.createServer(app);
 const io = new Server(server, {
 	cors: {
@@ -78,3 +80,5 @@ io.on("connection", (socket) => {
 server.listen(PORT, function () {
 	console.log(`Example app listening on port ${PORT}!`);
 });
+
+module.exports.handler = serverless(app)
