@@ -7,7 +7,7 @@
 		"start": "./node_modules/.bin/netlify-lambda serve src",
 		"server": "nodemon app.js",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "./node_modules/.bin/netlify-lambda serve src"
+		"build": "echo \"No build step needed for this project\""
 	},
 	"author": "",
 	"license": "ISC",
