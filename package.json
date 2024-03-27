@@ -1,27 +1,30 @@
 {
-	"name": "blue-garage-node-app",
-	"version": "1.0.0",
-	"description": "",
-	"main": "app.js",
-	"scripts": {
-		"start": "nodemon ./functions/app.js",
-		"server": "nodemon app.js",
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"build": "netlify deploy --prod --build"
-	},
-	"author": "",
-	"license": "ISC",
-	"dependencies": {
-		"amqplib": "^0.10.3",
-		"cors": "^2.8.5",
-		"dotenv": "^16.4.5",
-		"express": "^4.19.2",
-		"http": "^0.0.1-security",
-		"netlify-lambda": "^2.0.16",
-		"nodemon": "^3.1.0",
-		"pino": "^8.19.0",
-		"pm2": "^5.3.1",
-		"serverless-http": "^3.2.0",
-		"socket.io": "^4.7.5"
-	}
+  "name": "blue-garage-node-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon ./functions/app.js",
+    "server": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "netlify deploy --prod --build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "http": "^0.0.1-security",
+    "netlify-lambda": "^2.0.16",
+    "nodemon": "^3.1.0",
+    "pino": "^8.19.0",
+    "pm2": "^5.3.1",
+    "serverless-http": "^3.2.0",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "netlify-cli": "^7.8.0"
+  }
 }
