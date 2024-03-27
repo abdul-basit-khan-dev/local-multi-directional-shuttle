@@ -6,7 +6,7 @@ const amqp = require("amqplib");
 require("dotenv").config();
 const { exec } = require("child_process");
 
-const PORT = 8000;
+const PORT = process.env.PORT || 8000;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
