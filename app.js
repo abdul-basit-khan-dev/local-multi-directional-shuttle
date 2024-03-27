@@ -6,8 +6,15 @@ const amqp = require("amqplib");
 require("dotenv").config();
 const { exec } = require("child_process");
 
-const PORT = process.env.PORT || 8000;
+const serverless = require("serverless-http");
 const app = express();
+const router = express.Router();
+
+router.get("/", (req, res) => {
+    res.send("App is running..");
+});
+
+const PORT = process.env.PORT || 8000;
 
 // Enable CORS for all requests
 app.use(cors());
@@ -79,3 +86,5 @@ app.get("/", (req, res) => {
 server.listen(PORT, function () {
     console.log(`Example app listening on port ${PORT}!`);
 });
+
+app.use("/.netlify/functions/app", router);
