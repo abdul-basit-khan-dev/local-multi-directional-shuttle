@@ -4,29 +4,23 @@ const http = require("http");
 const { Server } = require("socket.io");
 const amqp = require("amqplib");
 require("dotenv").config();
-const { exec } = require("child_process");
 
-const serverless = require("serverless-http");
 const app = express();
-const router = express.Router();
-
-router.get("/", (req, res) => {
-    res.send("App is running..");
-});
-
-const PORT = process.env.PORT || 8000;
-
-// Enable CORS for all requests
-app.use(cors());
-
 const server = http.createServer(app);
 const io = new Server(server);
+const router = express.Router();
 
 const queueConsume = "Grid-Level-Instructions";
 const queueSend = "CompletedInstructions";
 const rabbitmqUrl = "amqp://20.190.124.233:5672/";
 const queueLiveLogs = "LiveLogs";
 let channel;
+
+app.use(cors());
+
+router.get("/", (req, res) => {
+    res.send("App is running..");
+});
 
 amqp
     .connect(rabbitmqUrl)
@@ -78,14 +72,12 @@ io.on("connection", (socket) => {
     });
 });
 
-// Route handler to return "App is running" message
-app.get("/", (req, res) => {
+router.get("/", (req, res) => {
     res.send("App is running");
 });
 
-server.listen(PORT, function () {
-    console.log(`Example app listening on port ${PORT}!`);
+server.listen(process.env.PORT || 8000, function () {
+    console.log(`Example app listening on port ${server.address().port}!`);
 });
 
-app.use("/.netlify/functions/app", router);
-module.exports.handler = serverless(app);
+module.exports = app;
